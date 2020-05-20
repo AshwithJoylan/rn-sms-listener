@@ -1,0 +1,29 @@
+{
+  "name": "rn-sms-listener",
+  "version": "1.0.0",
+  "description": "## Getting started",
+  "main": "index.js",
+  "module": "index.js",
+  "typings": "./index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": "Ashwith Saldanha",
+  "license": "ISC",
+  "peerDependencies": {
+    "react-native": "^0.41.2",
+    "react-native-windows": "0.41.0-rc.1",
+    "typescript": "~2.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AshwithJoylan/rn-sms-listener.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AshwithJoylan/rn-sms-listener/issues"
+  },
+  "homepage": "https://github.com/AshwithJoylan/rn-sms-listener#readme"
+}
