@@ -1,61 +1,69 @@
-
 package com.reactlibrary;
 
 import android.content.BroadcastReceiver;
-import android.content.IntentFilter;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Telephony;
+import android.telephony.SmsMessage;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.de.tridentapp.SmsReceiver;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class RNSmsListenerModule extends ReactContextBaseJavaModule {
+import java.util.Objects;
 
-  private final ReactApplicationContext reactContext;
-  private BroadcastReceiver mReceiver;
-  private boolean isReceiverRegistered = false;
+public class SmsReceiver extends BroadcastReceiver {
 
-  public RNSmsListenerModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-  }
+    private static final String TAG = "SmsReceiver";
+    private ReactApplicationContext mContext;
 
-  @Override
-  public String getName() {
-    return "RNSmsListener";
-  }
-
-    private void registerReceiverIfNecessary(BroadcastReceiver receiver) {
-        if (getCurrentActivity() == null) return;
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                getCurrentActivity().registerReceiver(
-                        receiver,
-                        new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
-                );
-            }
-            isReceiverRegistered = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public SmsReceiver() {
+        super();
     }
 
-    @ReactMethod
-    public void registerReceiver() {
-        mReceiver = new SmsReceiver(reactContext);
-        registerReceiverIfNecessary(mReceiver);
+    public SmsReceiver(ReactApplicationContext context) {
+        mContext = context;
     }
 
-    @ReactMethod
-    public void unregisterReceiver() {
-        if (getCurrentActivity() != null && mReceiver != null && isReceiverRegistered) {
-            try{
-                getCurrentActivity().unregisterReceiver(mReceiver);
-                isReceiverRegistered = false;
-            } catch (Exception e) {
-                e.printStackTrace();
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Objects.equals(intent.getAction(), "android.provider.Telephony.SMS_RECEIVED")) {
+                Log.d("TAG", "onReceive: " + intent);
+                String smsSender = "";
+                String smsBody = "";
+
+                Bundle smsBundle = intent.getExtras();
+                if (smsBundle != null) {
+                    Object[] pdus = (Object[]) smsBundle.get("pdus");
+                    if (pdus == null) {
+                        // Display some error to the user
+                        Log.e(TAG, "SmsBundle had no pdus key");
+                        return;
+                    }
+                    SmsMessage[] messages = new SmsMessage[pdus.length];
+                    for (int i = 0; i < messages.length; i++) {
+                        messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                        smsBody += messages[i].getMessageBody();
+                    }
+                    smsSender = messages[0].getOriginatingAddress();
+                }
+
+                Log.d(TAG, "onReceive: " + smsSender + " " + smsBody);
+                WritableNativeMap receivedMessage = new WritableNativeMap();
+                receivedMessage.putString("sender", smsSender);
+                receivedMessage.putString("body", smsBody);
+                Log.d("Tag", "onReceive: " + receivedMessage);
+                if (mContext != null) {
+                    mContext
+                            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("onReceiveMessage", receivedMessage);
+
+                }
             }
         }
     }

@@ -1,14 +1,20 @@
 
 package com.reactlibrary;
 
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.os.Build;
+import android.provider.Telephony;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 
 public class RNSmsListenerModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
+  private BroadcastReceiver mReceiver;
+  private boolean isReceiverRegistered = false;
 
   public RNSmsListenerModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -37,7 +43,7 @@ public class RNSmsListenerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void registerReceiver() {
-        mReceiver = new OtpReceiver(reactContext);
+        mReceiver = new SmsReceiver(reactContext);
         registerReceiverIfNecessary(mReceiver);
     }
 
