@@ -16,7 +16,7 @@ const requestPermissions = () =>
     'android.permission.RECEIVE_MMS',
   ]);
 
-const check = async () => new Promise((resolve, reject) => {
+const check = async () => new Promise(async (resolve, reject) => {
   try {
     const g1 = await PermissionsAndroid.check('android.permission.READ_SMS');
     const g2 = await PermissionsAndroid.check('android.permission.RECEIVE_SMS');
