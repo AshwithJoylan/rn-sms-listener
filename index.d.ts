@@ -1,7 +1,7 @@
 declare const RNSmsListener: {
-  registerReceiver: () => void;
+  registerReceiver: () => Promise<void>;
   requestPermissions: () => Promise<{
-    "'android.permission.READ_SMS": PermissionStatus;
+    "android.permission.READ_SMS": PermissionStatus;
     "android.permission.RECEIVE_MMS": PermissionStatus;
   }>;
   unregisterReceiver: () => void;

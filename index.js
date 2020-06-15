@@ -16,11 +16,30 @@ const requestPermissions = () =>
     'android.permission.RECEIVE_MMS',
   ]);
 
+const check = async () => new Promise((resolve, reject) => {
+  try {
+    const g1 = await PermissionsAndroid.check('android.permission.READ_SMS');
+    const g2 = await PermissionsAndroid.check('android.permission.RECEIVE_SMS');
+    if (g1 && g2) {
+      resolve(true);
+    } else {
+      reject(false);
+    }
+  } catch (err) {
+  reject(false)
+ }
+})
+  
 export default {
   requestPermissions,
-  registerReceiver: () => {
+  registerReceiver: async () => {
     if (isAndroid) {
-      RNSmsListener.registerReceiver();
+      const granted = await check();
+      if (granted) {
+        RNSmsListener.registerReceiver();
+      } else {
+        console.log('RN SMS LISTENER: -> Permission Not Granted');
+      }
     }
   },
   unregisterReceiver: () => {
